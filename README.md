@@ -49,7 +49,7 @@ Use the item shortcode for each question/answer pair.
 
 
 Example:
-
+```html
 [cipit_accordion]
     [cipit_accordion_item title="What are the core functions of CIPIT?"]
         <p>The content area dynamically expands to reveal the answer. The max-height calculation ensures the bottom padding (1.2rem) is never cut off during the transition.</p>
@@ -64,3 +64,4 @@ Example:
         <p>This item is set to open by default using the <code>open="true"</code> attribute.</p>
     [/cipit_accordion_item]
 [/cipit_accordion]
+```
