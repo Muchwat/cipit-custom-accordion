@@ -20,9 +20,6 @@ A custom-built, lightweight WordPress accordion component designed specifically 
 1. **Download:** Download the `cipit-custom-accordion.php` file (or clone this repository).
 2. **Upload:** Upload the `cipit-custom-accordion.php` file directly into your WordPress plugins directory (`/wp-content/plugins/`).
 3. **Activate:** Navigate to the WordPress dashboard (Plugins → Installed Plugins) and activate **Cipit Custom Accordion**.
-
-> **Note**: As of the latest check, [the GitHub repository](https://github.com/Muchwat/cipit-custom-accordion) appears to be empty. Please verify the source before downloading.
-
 ## Usage (Shortcodes)
 
 Place the following shortcode structure into any post, page, or widget that supports shortcodes (e.g., using the WordPress "Shortcode" block).
