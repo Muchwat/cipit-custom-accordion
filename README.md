@@ -1,4 +1,4 @@
-# 📂 Cipit Custom Accordion
+# Cipit Custom Accordion
 
 [![GitHub Repository](https://img.shields.io/badge/GitHub-View%20Source-blue?style=flat&logo=github)](https://github.com/Muchwat/cipit-custom-accordion)  
 [![WordPress Plugin](https://img.shields.io/badge/WordPress-Plugin-D54E21?style=flat&logo=wordpress)](https://developer.wordpress.org/plugins/)  
@@ -6,7 +6,7 @@
 
 A custom-built, lightweight WordPress accordion component designed specifically for the CIPIT website theme. It is styled to seamlessly integrate with the site's design system, respecting the defined CSS variables for colors, spacing, and the Golden Ratio (`--gr`).
 
-## ✨ Features
+## Features
 
 - **Theme Integration:** Automatically inherits colors (`--primary-color`, `--secondary-color`) and visual styles (`--border-radius`, `--card-shadow`) from the site's CSS `:root`.
 - **Single-File Plugin:** Simple installation and activation via one PHP file (`cipit-custom-accordion.php`).
@@ -15,15 +15,15 @@ A custom-built, lightweight WordPress accordion component designed specifically 
 - **Robust Animation Fix:** Correctly handles dynamic padding during the open/close animation, preventing content cut-off.
 - **Accessibility:** Includes `aria-expanded` and `aria-controls` attributes for improved screen reader compatibility.
 
-## 🚀 Installation
+## Installation
 
 1. **Download:** Download the `cipit-custom-accordion.php` file (or clone this repository).
 2. **Upload:** Upload the `cipit-custom-accordion.php` file directly into your WordPress plugins directory (`/wp-content/plugins/`).
 3. **Activate:** Navigate to the WordPress dashboard (Plugins → Installed Plugins) and activate **Cipit Custom Accordion**.
 
-> ⚠️ **Note**: As of the latest check, [the GitHub repository](https://github.com/Muchwat/cipit-custom-accordion) appears to be empty. Please verify the source before downloading.
+> **Note**: As of the latest check, [the GitHub repository](https://github.com/Muchwat/cipit-custom-accordion) appears to be empty. Please verify the source before downloading.
 
-## 💻 Usage (Shortcodes)
+## Usage (Shortcodes)
 
 Place the following shortcode structure into any post, page, or widget that supports shortcodes (e.g., using the WordPress "Shortcode" block).
 
