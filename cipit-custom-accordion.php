@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Cipit Custom Accordion
  * Description: Accordion component for CIPIT website. Styled using the theme's Golden Ratio and Primary Color variables. Includes auto-open support and robust content padding fix. Source Code: <a href="https://github.com/Muchwat/cipit-custom-accordion" target="_blank">GitHub Repository</a>
- * Version: 1.5.2
+ * Version: 1.6.1
  * Author: Kevin Muchwat
  * Author URI: https://github.com/Muchwat
  */
@@ -10,14 +10,16 @@
 if (!defined('ABSPATH'))
     exit;
 
+// Global counters for unique IDs
+$cipit_accordion_counter = 0;
+$cipit_acc_item_counter = 0;
 
 // ---------------------------------------------------------
-// 1. Load CSS + JS
+// 1. Enqueue Styles and Scripts
 // ---------------------------------------------------------
 function cipit_acc_enqueue_assets()
 {
-
-    // Enqueue Font Awesome for the chevron icon
+    // Font Awesome
     wp_enqueue_style(
         'cipit-acc-fontawesome',
         'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css',
@@ -25,13 +27,13 @@ function cipit_acc_enqueue_assets()
         '5.15.4'
     );
 
-    // CSS: Added inline for single-file plugin simplicity
+    // Inline CSS
     wp_register_style('cipit-acc-styles', false);
     wp_enqueue_style('cipit-acc-styles');
     wp_add_inline_style('cipit-acc-styles', cipit_acc_get_css());
 
-    // JS: Added inline for single-file plugin simplicity (relies on jQuery)
-    wp_register_script('cipit-acc-script', false, array('jquery'), '1.0', true);
+    // Inline JS (depends on jQuery)
+    wp_register_script('cipit-acc-script', false, array('jquery'), '1.6.1', true);
     wp_enqueue_script('cipit-acc-script');
     wp_add_inline_script('cipit-acc-script', cipit_acc_get_js());
 }
@@ -41,12 +43,19 @@ add_action('wp_enqueue_scripts', 'cipit_acc_enqueue_assets');
 // ---------------------------------------------------------
 // 2. Shortcodes
 // ---------------------------------------------------------
-// Global counter ensures unique IDs for accessibility
-$cipit_acc_item_counter = 0;
-
 function cipit_acc_accordion_shortcode($atts, $content = null)
 {
-    return '<div class="custom-accordion">' . do_shortcode($content) . '</div>';
+    global $cipit_accordion_counter;
+    $cipit_accordion_counter++;
+
+    $atts = shortcode_atts(array(
+        'id' => 'cipit-accordion-' . $cipit_accordion_counter
+    ), $atts);
+
+    // Sanitize ID for use in HTML
+    $id = sanitize_html_class($atts['id']);
+
+    return '<div id="' . esc_attr($id) . '" class="custom-accordion">' . do_shortcode($content) . '</div>';
 }
 add_shortcode('cipit_accordion', 'cipit_acc_accordion_shortcode');
 
@@ -61,20 +70,19 @@ function cipit_acc_accordion_item_shortcode($atts, $content = null)
         'open' => 'false'
     ), $atts);
 
-    // Add 'active' and 'default-open' classes if 'open' is true
     $is_open = ($atts['open'] === 'true') ? ' active default-open' : '';
-
-    $id = 'cipit-acc-' . $cipit_acc_item_counter;
+    $content_id = 'cipit-acc-content-' . $cipit_acc_item_counter;
 
     ob_start();
     ?>
     <div class="accordion-item<?php echo $is_open; ?>">
-        <button class="accordion-header" aria-expanded="<?php echo $atts['open']; ?>" aria-controls="<?php echo $id; ?>">
+        <button class="accordion-header" aria-expanded="<?php echo ($atts['open'] === 'true') ? 'true' : 'false'; ?>"
+            aria-controls="<?php echo $content_id; ?>">
             <span class="accordion-title"><?php echo esc_html($atts['title']); ?></span>
             <i class="fas fa-chevron-down accordion-icon"></i>
         </button>
 
-        <div id="<?php echo $id; ?>" class="accordion-content">
+        <div id="<?php echo $content_id; ?>" class="accordion-content">
             <p><?php echo do_shortcode($content); ?></p>
         </div>
     </div>
@@ -99,10 +107,7 @@ function cipit_acc_get_css()
         background: var(--light-gray, #f8f9fa);
         border: 1px solid #eee;
         border-radius: var(--border-radius, 12px);
-
-        /* SUPER-COMPACT GAP */
         margin-bottom: 0.1875rem;
-
         overflow: hidden;
         box-shadow: var(--card-shadow, 0 4px 12px rgba(0, 0, 0, 0.05));
         transition: box-shadow .25s ease;
@@ -150,7 +155,6 @@ function cipit_acc_get_css()
         transition: max-height .35s ease-out, padding .35s ease-out;
     }
 
-    /* OPEN STATE - NOTE: JS handles max-height */
     .accordion-item.active .accordion-content {
         padding: 1rem 1.4rem 1.2rem;
     }
@@ -166,55 +170,73 @@ function cipit_acc_get_css()
 
 
 // ---------------------------------------------------------
-// 4. JavaScript Logic (With max-height padding fix)
+// 4. JavaScript (with tab/visibility fix)
 // ---------------------------------------------------------
 function cipit_acc_get_js()
 {
     return "
 jQuery(function($){
 
-    // Define a reliable buffer (in pixels) to compensate for the vertical padding 
-    // applied by CSS when the 'active' class is added.
     const PADDING_BUFFER = 50;
 
-    $('.accordion-item').each(function(){
+    // Initialize all accordions on page load
+    function initAccordions(container) {
+        const accordions = container ? $(container).find('.custom-accordion') : $('.custom-accordion');
 
-        var item = $(this);
-        var header = item.find('.accordion-header');
-        var content = item.find('.accordion-content');
+        accordions.each(function(){
+            const accordion = $(this);
 
-        // Initial check for default-open items
-        if(item.hasClass('default-open')){
-            // Apply buffer for default-open items
-            let h = content.prop('scrollHeight');
-            content.css('max-height', h + PADDING_BUFFER + 'px');
-        }
+            accordion.find('.accordion-item').each(function(){
+                const item = $(this);
+                const header = item.find('.accordion-header');
+                const content = item.find('.accordion-content');
 
-        header.on('click', function(){
+                // Initialize default-open items
+                if(item.hasClass('default-open')){
+                    const h = content.prop('scrollHeight');
+                    content.css('max-height', h + PADDING_BUFFER + 'px');
+                }
 
-            var isOpen = item.hasClass('active');
+                // Click handler
+                header.off('click.cipitAccordion').on('click.cipitAccordion', function(){
+                    const isOpen = item.hasClass('active');
 
-            // close all except this
-            $('.accordion-item.active').not(item).each(function(){
-                $(this).removeClass('active')
-                       .find('.accordion-content').css('max-height','0');
+                    // Close others in same accordion
+                    accordion.find('.accordion-item.active').not(item).each(function(){
+                        $(this).removeClass('active')
+                               .find('.accordion-content').css('max-height', '0');
+                    });
+
+                    item.toggleClass('active');
+                    header.attr('aria-expanded', item.hasClass('active'));
+
+                    if(isOpen){
+                        content.css('max-height', '0');
+                    } else {
+                        const fullHeight = content.prop('scrollHeight');
+                        content.css('max-height', fullHeight + PADDING_BUFFER + 'px');
+                    }
+                });
             });
-
-            item.toggleClass('active');
-
-            if(isOpen){
-                // CLOSE
-                content.css('max-height', '0');
-            } else {
-                // OPEN
-                let fullHeight = content.prop('scrollHeight');
-                // FIX: Add the buffer to ensure the CSS padding is fully visible
-                content.css('max-height', fullHeight + PADDING_BUFFER + 'px');
-            }
         });
+    }
 
-    });
+    // Run on initial page load
+    initAccordions();
+
+    // Expose public refresh method for tabs, modals, etc.
+    window.CipitAccordions = window.CipitAccordions || {};
+    window.CipitAccordions.refresh = function(container) {
+        // Re-initialize height for default-open items in visible state
+        const targets = container ? $(container).find('.accordion-item.default-open.active') : $('.accordion-item.default-open.active');
+        targets.each(function(){
+            const content = $(this).find('.accordion-content');
+            const h = content.prop('scrollHeight');
+            content.css('max-height', h + PADDING_BUFFER + 'px');
+        });
+    };
+
+    // Optional: auto-refresh if MutationObserver or tab events are used elsewhere
 });
 ";
 }
-?>
